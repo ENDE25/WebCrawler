@@ -1,0 +1,245 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0d1117;
+    color: #fff;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+}
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+.top-panel {
+    width: 100%;
+    background: #070911 !important;
+    /* Más oscuro que el grafo pero no negro */
+    padding: 1.5em 2em 1em 2em;
+    box-sizing: border-box;
+    border-bottom: 2px solid #272b2e; /* gris bootstrap */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    
+}
+.top-panel h1 {
+    font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2383e2;
+    letter-spacing: 2px;
+    margin: 0 auto 0.2em auto;
+    text-align: center;
+}
+.top-controls {
+    display: flex;
+    gap: 0.2em;
+    align-items: center;
+    height: 44px;
+}
+.top-controls input,
+.top-controls label,
+.top-controls button {
+    height: 44px;
+    box-sizing: border-box;
+    margin-bottom: 0;
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+}
+#urlInput {
+    flex: 1;
+    padding: 0.5em;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    background: #161b22;
+    color: #fff;
+    border: 2px solid #2383e2;
+    border-radius: 10px;
+    padding: 7px 12px;
+    font-size: 16px;
+    outline: none;
+    box-shadow: 0 1px 4px rgba(20,20,40,0.12);
+    transition: border 0.2s;
+    height: 44px;
+    margin-right: 10px;
+
+}
+#urlInput:focus, #maxNodesInput:focus {
+    border-color: #58a6ff;
+}
+#maxNodesInput::-webkit-inner-spin-button, #maxNodesInput::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    display: none;
+}
+#maxNodesInput {
+    width: 60px !important;
+    min-width: 48px;
+    max-width: 80px;
+    background: #161b22;
+    color: #fff;
+    border: 2px solid #2383e2;
+    border-radius: 10px;
+    padding: 7px 8px;
+    font-size: 16px;
+    outline: none;
+    box-shadow: 0 1px 4px rgba(20,20,40,0.12);
+    transition: border 0.2s;
+    text-align: center;
+    height: 44px;
+    margin-right: 2px;
+    color-scheme: dark;
+    position: relative;
+}
+#maxNodesInput:after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+    background: url('data:image/svg+xml;utf8,<svg fill="%236c757d" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8 10.5l-4-4h8l-4 4z"/></svg>') no-repeat center center;
+    transform: translateY(-50%);
+    opacity: 0.7;
+}
+/* Para Firefox */
+#maxNodesInput[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+button {
+    padding: 0.5em 1.2em;
+    font-size: 1em;
+    border-radius: 6px;
+    border: none;
+    background: #4f8cff;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 7px 18px;
+    margin: 0 6px;
+    border: 2px solid #2383e2;
+    background: #2383e2;
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(20,20,40,0.12);
+    cursor: pointer;
+    transition: background 0.2s, border 0.2s;
+    height: 44px;
+    margin: 0 1px;
+}
+button:disabled {
+    background: #161b22;
+    color: #aaa;
+    border: 2px solid #444;
+    cursor: not-allowed;
+}
+#status {
+    display: block;
+    font-size: 15px;
+    color: #fff;
+    font-weight: 500;
+    min-height: 22px;
+    text-align: center;
+}
+.graph-panel {
+    flex: 1;
+    width: 100%;
+    background: #21262d;
+    position: relative;
+    overflow: auto;
+    display: flex;
+    min-height: 0;
+}
+#graphSvg {
+    width: 100%;
+    height: 100%;
+    background: #090e16;
+    display: block;
+    border-radius: 18px;
+    border: 1.5px solid #21262d;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+.controls {
+    flex: none;
+    height: 72px;
+    min-height: 64px;
+    max-height: 64px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 12px;
+    padding-bottom: 8px;
+    gap: 8px;
+    background: #010409;
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    border: 1.5px solid #21262d;
+    padding: 18px 0 12px 0;
+    margin-bottom: 12px;
+    width: 100%;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 110px;
+    justify-content: flex-start;
+}
+#stopBtn, #exportBtn {
+    background: #161b22;
+    color: #ffffff;
+    border: 1px solid #ffffff2d;
+}
+#stopBtn:hover, #exportBtn:hover {
+    background: #21262d;
+    border-color: #58a6ff;
+}
+#startBtn {
+    background: #2383e2;
+    border: 2px solid #2383e2;
+    color: #fff;
+}
+#startBtn:hover {
+    background: #58a6ff;
+    border-color: #2383e2;
+}
+/* D3 Nodos y enlaces */
+line.normal {
+    stroke: #222c3a;
+    stroke-width: 1.2;
+}
+line.red {
+    stroke: #e74c3c;
+    stroke-width: 1.2;
+}
+circle {
+    stroke: #1b2840;
+    stroke-width: 2.5;
+}
+rect {
+    stroke: #1b2840;
+}
+text {
+    fill: #fff;
+    font-weight: 400;
+}
+.top-controls label {
+    margin-right: 4px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+    padding-left: 2px;
+    padding-right: 2px;
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebCrawler</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="top-panel">
+            <h1 style="margin:0 auto; text-align:center; font-size:2.2rem; font-family:'Poppins','Segoe UI',Arial,sans-serif; font-weight:700; letter-spacing:2px;">
+                <span style="color:#2383e2;">WEB</span><span style="color:#fff;">Crawler</span>
+            </h1>
+            <div class="top-controls">
+                <input type="text" id="urlInput" placeholder="Paste the website link here">
+                <label for="maxNodesInput" style="color:#fff; font-size:15px; font-weight:500; margin-right:4px;">   Scanning Depth</label>
+                <input type="number" id="maxNodesInput" min="1" max="9999" value="10" title="Scanning Depth">
+                <button id="startBtn">Start Mapping</button>
+                <button id="stopBtn" disabled>Stop</button>
+                <button id="exportBtn" disabled>Export Map</button>
+            </div>
+            <div id="status"></div>
+        </div>
+        <div class="graph-panel">
+            <svg id="graphSvg"></svg>
+        </div>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
