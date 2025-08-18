@@ -390,6 +390,35 @@ function drawGraph(map, rootUrl) {
             }
         });
     }
+    // Leyenda en la esquina inferior izquierda
+    const legendGroup = svg.append('g')
+        .attr('id', 'legendGroup')
+        .attr('transform', 'translate(24,' + (svg.node().clientHeight - 80) + ')');
+    const legendData = [
+        {color: '#2383e2', text: 'Selected Page'},
+        {color: '#e74c3c', text: 'Visitable from Selected Page'},
+        {color: '#888', text: 'External Site'}
+    ]; 
+    legendGroup.selectAll('circle')
+        .data(legendData)
+        .enter()
+        .append('circle')
+        .attr('cx', 0)
+        .attr('cy', (d, i) => i * 28)
+        .attr('r', 9)
+        .attr('fill', d => d.color)
+        .attr('stroke', '#1b2840')
+        .attr('stroke-width', 2);
+    legendGroup.selectAll('text')
+        .data(legendData)
+        .enter()
+        .append('text')
+        .attr('x', 22)
+        .attr('y', (d, i) => i * 28 + 4)
+        .attr('fill', '#fff')
+        .attr('font-size', 15)
+        .attr('font-family', 'Inter, Segoe UI, Arial, sans-serif')
+        .text(d => d.text);
     svg.call(d3.zoom().scaleExtent([0.2, 2]).on('zoom', (event) => {
         g.attr('transform', event.transform);
     }));
