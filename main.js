@@ -49,6 +49,17 @@ exportBtn.onclick = () => {
     a.click();
 };
 
+const expandSelectedBtn = document.getElementById('expandSelectedBtn');
+expandSelectedBtn.onclick = async () => {
+    if (!selectedNodeUrl) return;
+    const node = siteMap[selectedNodeUrl];
+    if (!node || node.external) return;
+    expandSelectedBtn.disabled = true;
+    await expandNodeOneLevel(selectedNodeUrl);
+    expandSelectedBtn.disabled = false;
+    drawGraph(siteMap, rootUrl);
+};
+
 async function expandNode(url, parent) {
     if (!running) return;
     if (visited.size >= maxNodes) return;
@@ -161,6 +172,95 @@ async function expandNodeBFS(startUrl, parent) {
     if (visited.size >= maxNodes) statusDiv.textContent = 'Node limit reached.';
 }
 
+async function expandNodeIgnoreLimit(url, parent) {
+    // Expande el nodo ignorando el límite de nodos
+    if (!running) return;
+    if (visited.has(url)) {
+        if (parent && siteMap[parent] && !siteMap[parent].children.includes(url)) {
+            siteMap[parent].children.push(url);
+        }
+        return;
+    }
+    visited.add(url);
+    statusDiv.textContent = `Expanding: ${url}`;
+    let html = '';
+    let title = url;
+    let links = [];
+    try {
+        const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+        if (!res.ok) return;
+        html = await res.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        title = doc.title || url;
+        links = Array.from(doc.querySelectorAll('a'));
+    } catch {
+        return;
+    }
+    const external = (new URL(url)).hostname !== mainDomain;
+    siteMap[url] = siteMap[url] || {url, title, external, children: []};
+    if (parent && siteMap[parent] && !siteMap[parent].children.includes(url)) {
+        siteMap[parent].children.push(url);
+    }
+    drawGraph(siteMap, rootUrl);
+    if (external) return;
+    for (const link of links) {
+        let href = link.getAttribute('href');
+        if (!href) continue;
+        if (href.startsWith('/')) {
+            href = (new URL(url)).origin + href;
+        } else if (!href.startsWith('http')) {
+            continue;
+        }
+        const ext = (new URL(href)).hostname !== mainDomain;
+        siteMap[href] = siteMap[href] || {url: href, title: link.textContent || href, external: ext, children: []};
+        if (!siteMap[url].children.includes(href)) {
+            siteMap[url].children.push(href);
+        }
+        // Solo expandir hijos internos, pero sin límite
+        if (!ext && !visited.has(href)) {
+            await expandNodeIgnoreLimit(href, url);
+        }
+    }
+}
+
+async function expandNodeOneLevel(url) {
+    // Expande solo el nodo seleccionado un nivel, ignorando el límite de nodos
+    if (!running) return;
+    const node = siteMap[url];
+    if (!node || node.external) return;
+    let html = '';
+    let title = url;
+    let links = [];
+    try {
+        const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+        if (!res.ok) return;
+        html = await res.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        title = doc.title || url;
+        links = Array.from(doc.querySelectorAll('a'));
+    } catch {
+        return;
+    }
+    node.title = title;
+    for (const link of links) {
+        let href = link.getAttribute('href');
+        if (!href) continue;
+        if (href.startsWith('/')) {
+            href = (new URL(url)).origin + href;
+        } else if (!href.startsWith('http')) {
+            continue;
+        }
+        const ext = (new URL(href)).hostname !== mainDomain;
+        siteMap[href] = siteMap[href] || {url: href, title: link.textContent || href, external: ext, children: []};
+        if (!node.children.includes(href)) {
+            node.children.push(href);
+        }
+    }
+    drawGraph(siteMap, rootUrl);
+}
+
 function drawGraph(map, rootUrl) {
     svg.selectAll('*').remove();
     const g = svg.append('g').attr('id', 'graphGroup');
@@ -252,6 +352,7 @@ function drawGraph(map, rootUrl) {
         .append('g')
         .attr('transform', d => `translate(${d.x},${d.y})`)
         .on('click', function(event, d) {
+            event.stopPropagation(); // Evita que el click en el nodo propague al fondo
             selectedNodeUrl = d.url;
             drawGraph(map, rootUrl);
         });
@@ -265,22 +366,6 @@ function drawGraph(map, rootUrl) {
         })
         .attr('stroke', d => d.url === selectedNodeUrl ? '#1c5db3' : '#1b2840')
         .attr('stroke-width', 2.5);
-    nodeGroup.filter(d => d.url === selectedNodeUrl)
-        .raise()
-        .select('circle')
-        .attr('fill', '#1c5db3')
-        .attr('stroke', '#1c5db3');
-    // Solo mostrar el texto negro si el nodo NO está seleccionado
-    nodeGroup.filter(d => d.url !== selectedNodeUrl)
-        .append('text')
-        .attr('x', 0)
-        .attr('y', 24)
-        .attr('text-anchor', 'middle')
-        .attr('fill', '#222')
-        .attr('font-size', 11)
-        .attr('font-weight', 'bold')
-        .text(d => d.title);
-    // Solo el nodo seleccionado muestra el título en un contenedor adaptativo y superpuesto
     nodeGroup.filter(d => d.url === selectedNodeUrl)
         .raise() // Eleva el grupo del nodo seleccionado sobre los demás
         .each(function(d) {
@@ -300,6 +385,15 @@ function drawGraph(map, rootUrl) {
             // Contenedor principal adaptativo
             const containerWidth = bbox.width + 60;
             const containerHeight = bbox.height + 16;
+            // Determinar color según hijos y tipo
+            let containerColor = '#1c5db3';
+            if (d.children && d.children.length > 0) {
+                containerColor = '#e74c3c'; // rojo si tiene hijos
+            } else if (d.external) {
+                containerColor = '#888'; // gris si es externo y sin hijos
+            } else {
+                containerColor = '#1c5db3'; // azul si es interno y sin hijos
+            }
             // Rectángulo principal
             gNode.append('rect')
                 .attr('x', bbox.x - 12)
@@ -307,8 +401,8 @@ function drawGraph(map, rootUrl) {
                 .attr('width', containerWidth)
                 .attr('height', containerHeight)
                 .attr('rx', 12)
-                .attr('fill', '#1c5db3') // azul más oscuro
-                .attr('stroke', '#1c5db3')
+                .attr('fill', containerColor)
+                .attr('stroke', containerColor)
                 .attr('stroke-width', 2)
                 .attr('filter', 'url(#selectedShadow)');
             // División para el botón
@@ -318,7 +412,8 @@ function drawGraph(map, rootUrl) {
                 .attr('width', 38)
                 .attr('height', containerHeight)
                 .attr('rx', 12)
-                .attr('fill', '#1c5db3'); // azul más oscuro
+                .attr('fill', containerColor)
+                .attr('stroke', 'none'); // Elimina el contorno del botón
             // Línea divisoria
             gNode.append('line')
                 .attr('x1', bbox.x - 12 + containerWidth - 38)
@@ -344,21 +439,30 @@ function drawGraph(map, rootUrl) {
                 .attr('xlink:href', d.url)
                 .attr('target', '_blank')
                 .append('text')
-                .attr('x', bbox.x - 12 + containerWidth - 19)
+                .attr('x', bbox.x - 12 + containerWidth - 19) // sin margen extra
                 .attr('y', 0)
                 .attr('text-anchor', 'middle')
                 .attr('fill', '#fff')
-                .attr('font-size', 18)
+                .attr('font-size', 16) // 2px más pequeño
                 .attr('font-weight', 'bold')
                 .attr('dominant-baseline', 'middle')
                 .attr('cursor', 'pointer')
-                .attr('background', '#1c5db3') // color de fondo para el botón de visitar
+                .attr('background', containerColor)
                 .text('↗');
         });
+    // Actualizar color del círculo y borde del nodo seleccionado
     nodeGroup.filter(d => d.url === selectedNodeUrl)
-        .select('rect')
-        .attr('fill', '#1c5db3')
-        .attr('stroke', '#1c5db3');
+        .select('circle')
+        .attr('fill', d => {
+            if (d.children && d.children.length > 0) return '#e74c3c';
+            if (d.external) return '#888';
+            return '#1c5db3';
+        })
+        .attr('stroke', d => {
+            if (d.children && d.children.length > 0) return '#e74c3c';
+            if (d.external) return '#888';
+            return '#1c5db3';
+        });
     nodeGroup.filter(d => d.url === selectedNodeUrl)
         .select('text')
         .attr('fill', '#fff');
@@ -376,7 +480,7 @@ function drawGraph(map, rootUrl) {
                 // Calcula la posición del texto al lado del punto, desplazado radialmente
                 const lvl = levels[child.url] ?? 1;
                 const angle = (2 * Math.PI * i) / directChildren.length;
-                const textOffset = 32;
+                const textOffset = 20; // Más cerca del círculo (antes 32)
                 const tx = child.x + textOffset * Math.cos(angle);
                 const ty = child.y + textOffset * Math.sin(angle);
                 g.append('text')
@@ -422,4 +526,10 @@ function drawGraph(map, rootUrl) {
     svg.call(d3.zoom().scaleExtent([0.2, 2]).on('zoom', (event) => {
         g.attr('transform', event.transform);
     }));
+    // Click en el fondo del grafo para volver al nodo raíz
+    svg.on('click', function(event) {
+        // Solo si el click no fue en un nodo
+        selectedNodeUrl = rootUrl;
+        drawGraph(map, rootUrl);
+    });
 }
