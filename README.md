@@ -1,11 +1,11 @@
 # WebCrawler
 
-[Try WebCrawler Online](https://ende25.github.io/WebCrawler/)
+[Use WebCrawler Online](https://ende25.github.io/WebCrawler/)
 
 <img width="1862" height="971" alt="image" src="https://github.com/user-attachments/assets/8e973b44-7c95-420c-869d-593f0211b309" />
 
 ## Application Overview
-WebCrawler is a visually modern, dark-themed web application for mapping and exploring the structure of any website. It is especially useful for OSINT (Open Source Intelligence) tasks, allowing you to:
+WebCrawler is a visually modern, dark-themed web application for mapping and exploring the structure of any website. It is especially useful for *OSINT* tasks, allowing you to:
 - Input a website URL and map its internal and external links.
 - Visualize the site structure as an interactive, real-time graph.
 - Distinguish between internal, external, and direct child nodes with clear color coding.
@@ -15,7 +15,7 @@ WebCrawler is a visually modern, dark-themed web application for mapping and exp
 ## Usage Modes
 ### 1. Full Mapping Mode
 - Enter the desired website URL in the input field.
-- Set the maximum node count (depth) for the scan. For a broad overview, use a higher value (e.g., 10 or more).
+- Set the maximum node count (depth) for the scan. For a broad overview, use a higher value (e.g., 5 or more).
 - Click **Start Mapping** to begin. The app will crawl and visualize the site up to the specified depth.
 - To start a new mapping, you must first click **Stop** to reset the state.
 - You can export the current map at any time using **Export Map**.
@@ -28,7 +28,7 @@ WebCrawler is a visually modern, dark-themed web application for mapping and exp
 - Repeat as needed to explore the site structure step by step.
 
 >[!tip]
->- For step-by-step mapping (navigation mode), start with depth 2 for a focused and manageable graph.
+>For step-by-step mapping (navigation mode), start with depth 2 for a focused and manageable graph.
 
 ## Controls
 - **URL Input**: Enter the website address to map.
@@ -41,17 +41,6 @@ WebCrawler is a visually modern, dark-themed web application for mapping and exp
 ## Recommendations
 - Always click **Stop** before starting a new mapping to reset the application state.
 - Use the legend at the bottom left to understand node color meanings.
-
-## Features
-- Interactive, zoomable, and pannable graph visualization.
-- GitHub-inspired dark blue theme.
-- Node selection, highlighting, and visit button.
-- Loop prevention and progress feedback.
-- Export to JSON.
-
----
-
-*For more details, see the screenshot above or try the app online!*
 
 
 
